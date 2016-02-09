@@ -1,11 +1,17 @@
 require 'sidekiq'
 
+# We'll configure the Sidekiq client to connect to redis using a custom
+# DB - this way we can run multiple apps on the same redis without them
+# stepping on each other
+
 Sidekiq.configure_client do |config|
-  config.redis = { namespace: 'x', size: 1 }
+  config.redis = { db: 1 }
 end
 
+# We'll configure the Sidekiq server as well
+
 Sidekiq.configure_server do |config|
-  config.redis = { namespace: 'x' }
+  config.redis = { db: 1 }
 end
 
 class OurWorker
@@ -13,26 +19,26 @@ class OurWorker
 
   # To use OurWorker manually, just call the instance method:
   #
-  #     OurWorker.new.perform(:super_hard)
+  #     OurWorker.new.perform("super_hard")
   #
-  # The argument can be one of :super_hard, :hard, or anything else (which will
+  # The argument can be one of "super_hard", "hard", or anything else (which will
   # presume easy work)
   #
   # To start the sidekiq worker:
   #
-  #     $ sidekiq -r ./worker.rb
+  #     $ bundle exec sidekiq -r ./worker.rb
   #
   # To create a new job for it to perform in the background:
   #
-  #     $ irb -r ./examples/por.rb
-  #     > OurWorker.perform_async :super_hard
+  #     $ bundle exec irb -r ./worker.rb
+  #     > OurWorker.perform_async "super_hard"
 
   def perform(complexity)
     case complexity
-    when :super_hard
-      sleep 20
+    when "super_hard"
+      sleep 60
       puts "Really took quite a bit of effort"
-    when :hard
+    when "hard"
       sleep 10
       puts "That was a bit of work"
     else
