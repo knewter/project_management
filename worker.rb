@@ -17,6 +17,8 @@ end
 class OurWorker
   include Sidekiq::Worker
 
+  sidekiq_options retry: 0
+
   # To use OurWorker manually, just call the instance method:
   #
   #     OurWorker.new.perform("super_hard")
@@ -36,7 +38,8 @@ class OurWorker
   def perform(complexity)
     case complexity
     when "super_hard"
-      sleep 60
+      puts "charging a credit card"
+      raise "Woops stuff got bad"
       puts "Really took quite a bit of effort"
     when "hard"
       sleep 10
